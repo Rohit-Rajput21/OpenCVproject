@@ -8,7 +8,7 @@ import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 class HoughCirclesRun {
     public void run(String[] args) {
-        String default_file = "C:\\Users\\rohit\\Desktop\\hough3.jpg";
+        String default_file = "C:\\Users\\rohit\\Desktop\\gauge1.jpeg";
         String filename = ((args.length > 0) ? args[0] : default_file);
         // Load an image
         Mat src = Imgcodecs.imread(filename, Imgcodecs.IMREAD_COLOR);
@@ -25,7 +25,7 @@ class HoughCirclesRun {
         Mat circles = new Mat();
         Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1.0,
                 (double)gray.rows()/16, // change this value to detect circles with different distances to each other
-                100.0, 30.0, 0, 0); // change the last two parameters
+                100.0, 30.0, 50, 0); // change the last two parameters
                 // (min_radius & max_radius) to detect larger circles
         for (int x = 0; x < circles.cols(); x++) {
             double[] c = circles.get(0, x);
