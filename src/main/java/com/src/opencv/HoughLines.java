@@ -12,6 +12,7 @@ class HoughLinesRun {
         String filename = ((args.length > 0) ? args[0] : default_file);
         // Load an image
         Mat src = Imgcodecs.imread(filename, Imgcodecs.IMREAD_GRAYSCALE);
+        
         // Check if image is loaded fine
         if( src.empty() ) {
             System.out.println("Error opening image!");
