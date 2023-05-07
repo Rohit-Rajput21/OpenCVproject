@@ -1,6 +1,7 @@
 package com.src.opencv;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.opencv.core.*;
@@ -27,7 +28,7 @@ class HoughCirclesRun2 {
         Mat circles = new Mat();
         Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1.0,
                 (double)gray.rows()/16, // change this value to detect circles with different distances to each other
-                100.0, 30.0, 50, 0); // change the last two parameters
+                100.0, 30.0,50, 0); // change the last two parameters
                 // (min_radius & max_radius) to detect larger circles
 
         for (int x = 0; x < circles.cols(); x++) {
@@ -94,6 +95,7 @@ class HoughCirclesRun2 {
             Point pt2 = new Point(Math.round(x0 - 1000*(-b)), Math.round(y0 - 1000*(a)));
             Imgproc.line(cdst, pt1, pt2, new Scalar(0, 0, 255), 3, Imgproc.LINE_AA, 0);
         }
+      //  System.out.println(lines);
         // Probabilistic Line Transform
         Mat linesP = new Mat(); // will hold the results of the detection
         Imgproc.HoughLinesP(dst, linesP, 1, Math.PI/10, 30, 30, 2); // runs the actual detection
@@ -102,17 +104,69 @@ class HoughCirclesRun2 {
             double[] l = linesP.get(x, 0);
             Imgproc.line(cdstP, new Point(l[0], l[1]), new Point(l[2], l[3]), new Scalar(0, 0, 255), 3, Imgproc.LINE_AA, 0);
         }
-        // Show results
-
+      // Show results
+      // System.loadLibrary( Core.NATIVE_LIBRARY_NAME );
+	  // String file ="C:\\Users\\rohit\\Desktop\\gauge1.jpeg";
+	      Mat src2 = cropped;
+	      //Converting the source image to binary
+	      Mat gray1 = new Mat(src.rows(), src2.cols(), src2.type());
+	      Imgproc.cvtColor(src2, gray1, Imgproc.COLOR_BGR2GRAY);
+	      Mat binary = new Mat(src2.rows(), src2.cols(), src2.type(), new Scalar(0));
+	      Imgproc.threshold(gray1, binary, 100, 255, Imgproc.THRESH_BINARY_INV);
+	      //Finding Contours
+	      List<MatOfPoint> contour = new ArrayList<>();
+	      Mat hierarchey = new Mat();
+	      Imgproc.findContours(binary, contour, hierarchey, Imgproc.RETR_TREE,
+	      Imgproc.CHAIN_APPROX_SIMPLE);
+	      Iterator<MatOfPoint> it = contour.iterator();
+	      while(it.hasNext()) {
+	         System.out.println(it.next());
+	      }
+	      Mat draw = Mat.zeros(binary.size(), CvType.CV_8UC3);
+	      for (int i = 0; i < contour.size(); i++) {
+	     //   System.out.println(contour);
+	         Scalar color = new Scalar(0, 0, 255);
+	         //Drawing Contours
+	         Imgproc.drawContours(draw, contour, i, color, 2, Imgproc.LINE_8, hierarchey, 2 ) ;
+	      }
+	  // double angle=findAngle(lines);
+	      
+	   HighGui.imshow("Contours operation", draw);
        HighGui.imshow("detected circles", src);
        HighGui.imshow("Cropped circle", cropped);
-    //    HighGui.imshow("Source", src1);
+    // HighGui.imshow("Source", src1);
        HighGui.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst);
        HighGui.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP);
-        // Wait and Exit
-        HighGui.waitKey();
+    // Wait and Exit
+       HighGui.waitKey();
         System.exit(0);
         
+    }
+    public  double findAngle(List<Point> points) {
+        Point a = points.get(points.size()-2);
+        Point b = points.get(points.size()-3);
+        Point c = points.get(points.size()-1);
+        double m1 = slope(b, a);
+        double m2 = slope(b, c);
+        double angle = Math.atan((m2-m1)/(1+m1*m2));
+        angle = Math.round(Math.toDegrees(angle));
+        if (angle<0) {
+            angle = 180+angle;
+        }
+        // Assumes image and cv2 variables are already defined elsewhere
+//        cv.putText(img, Double.toString(angle),
+//                      new Point(b.x-40, b.y+40),
+//                      cv.FONT_HERSHEY_DUPLEX, 2, new Scalar(0,0,255),2);
+//        cv.imshow("image", img);
+        return angle;
+    }
+
+    public  double slope(Point pt1, Point pt2) {
+        if(pt1.x == pt2.x) {
+            return Double.POSITIVE_INFINITY;
+        } else {
+            return (double)(pt2.y - pt1.y) / (pt2.x - pt1.x);
+        }
     }
 }
 public class ImplementMain {
